@@ -15,7 +15,8 @@ internal enum EncodingMode {
     KANJI = 3
 }
 
+
 public class QRCode {
 
-    public abstract 
+    //public abstract 
 }
