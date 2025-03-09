@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <EmbeddedResource Include="Resources\Tables\QRAlphanumericEncodingTable.txt"/>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Tables\QRAlphanumericEncodingTable.txt"/>
+  </ItemGroup>
 
 </Project>
