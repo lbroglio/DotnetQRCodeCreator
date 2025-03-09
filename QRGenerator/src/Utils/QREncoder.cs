@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using QRGenerator.IO;
 
 namespace QRGenerator.Utils;
@@ -27,7 +28,7 @@ internal interface IQREncoder{
     byte[] Encode(string toEncode);
 }
 
-internal abstract class QREncoderBase : IQREncoder
+public abstract class QREncoderBase : IQREncoder
 {
     /// <summary>
     /// Set containing the characters allowed to be used for the mode this Encoder encodes strings into.
@@ -82,11 +83,11 @@ internal class NumericQREncoder : QREncoderBase
                 string num = toEncode.Substring(i, 1);
                 short threeDigitNumInt = short.Parse(num);
 
-                // Add each bit in the first four bits (starting at the LSB) to the array as its own byte type
-                for(int j = 0; j < 4; j++){
+                // Add each bit in the first four bits (starting at the HSB) to the array as its own byte type
+                for(int j = 3; j >= 0; j-=1){
                     short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte LSB = (byte)(shiftedNum & 1);
-                    encoded.Add(LSB);
+                    byte HSB = (byte)(shiftedNum & 1);
+                    encoded.Add(HSB);
                 }
 
                 
@@ -97,24 +98,23 @@ internal class NumericQREncoder : QREncoderBase
                 string num = toEncode.Substring(i, 2);
                 short threeDigitNumInt = short.Parse(num);
 
-                // Add each bit in the first eight bits (starting at the LSB) to the array as its own byte type
-                for(int j = 0; j < 8; j++){
+                // Add each bit in the first eight bits (starting at the HSB) to the array as its own byte type
+                for(int j = 7; j >= 0; j-=1){
                     short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte LSB = (byte)(shiftedNum & 1);
-                    encoded.Add(LSB);
+                    byte HSB = (byte)(shiftedNum & 1);
+                    encoded.Add(HSB);
                 }
             }
             // If three+ numbers are left
             else{
                 string threeDigitNum = toEncode.Substring(i, 3);
-                Console.WriteLine(threeDigitNum);
                 short threeDigitNumInt = short.Parse(threeDigitNum);
 
-                // Add each bit in the first ten bits (starting at the LSB) to the array as its own byte type
-                for(int j =0; j < 10; j++){
+                // Add each bit in the first ten bits (starting at the HSB) to the array as its own byte type
+                for(int j = 9; j >= 0; j-=1){
                     short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte LSB = (byte)(shiftedNum & 1);
-                    encoded.Add(LSB);
+                    byte HSB = (byte)(shiftedNum & 1);
+                    encoded.Add(HSB);
                 }
             }
 
@@ -167,16 +167,16 @@ internal class AlphanumericQREncoder : QREncoderBase
         }
 
         List<byte> encoded = new List<byte>();
-        for(int i = 0; i < toEncode.Length; i++){
+        for(int i = 0; i < toEncode.Length; i+=2){
             // If there is only one character left
             if(i + 1 >= toEncode.Length){
                 short encodedNum = (short) EncodingTable[toEncode[i]];
 
-                // Add each bit in the first eleven bits (starting at the LSB) to the array as its own byte type
-                for(int j = 0; j < 6; j++){
+                // Add each bit in the first eleven bits (starting at the HSB) to the array as its own byte type
+                for(int j = 5; j >= 0; j-=1){
                     short shiftedNum = (short)(encodedNum >> j);
-                    byte LSB = (byte)(shiftedNum & 1);
-                    encoded.Add(LSB);
+                    byte HSB = (byte)(shiftedNum & 1);
+                    encoded.Add(HSB);
                 }
 
             }
@@ -190,11 +190,11 @@ internal class AlphanumericQREncoder : QREncoderBase
                 // Combine the two and add to byte array
                 short encodedNum = (short) ((encode1 * 45) + encode2);
 
-                // Add each bit in the first eleven bits (starting at the LSB) to the array as its own byte type
-                for(int j = 0; j < 11; j++){
+                // Add each bit in the first eleven bits (starting at the HSB) to the array as its own byte type
+                for(int j = 10; j >= 0; j-=1){
                     short shiftedNum = (short)(encodedNum >> j);
-                    byte LSB = (byte)(shiftedNum & 1);
-                    encoded.Add(LSB);
+                    byte HSB = (byte)(shiftedNum & 1);
+                    encoded.Add(HSB);
                 }
             }
         }
@@ -202,5 +202,41 @@ internal class AlphanumericQREncoder : QREncoderBase
         return encoded.ToArray();
 
 
+    }
+    
+}
+
+internal class ByteQREncoder : QREncoderBase
+{
+
+    private static HashSet<char>? _charSet = null;
+    protected override HashSet<char> ALLOWED_CHARS {
+        get 
+        {
+            _charSet ??= ResourceIO.ReadInCharset("QRGenerator.Resources.Charsets.ISO8859-1.txt");
+            return _charSet;
+        }
+    }
+
+    public override byte[] Encode(string toEncode)
+    {
+        // Check that toEncode is legal for the mode of this encoder
+        if(!ValidateChars(toEncode)){
+            throw new ArgumentException("toEncode contains characters not allowed in byte encoding. Allowed Chars are specified in ISO8859-1");
+        }
+
+        //Encode String
+        List<byte> encoded = new List<byte>();
+        byte[] stringLatin1 = Encoding.Latin1.GetBytes(toEncode);
+        // Load every bit into the array
+        foreach(byte b in stringLatin1){
+            for(int i = 7; i >= 0; i-=1){
+                    byte shifted = (byte) (b >> i);
+                    byte HSB = (byte) (shifted & 1);
+                    encoded.Add(HSB);
+            }
+        }
+
+        return encoded.ToArray();
     }
 }
