@@ -5,14 +5,14 @@ using QRGenerator.IO;
 namespace QRGenerator.Utils;
 
 /// <summary>
-///  Interface of an object which encodes a character into an array of bits depending on the 
+///  Interface of an object which encodes a character string into an array of bits depending on the 
 /// encoding mode used for the QR code <br/>
 /// The possible encoding modes are <br/>
 /// - Numeric: Only 0-9 are allowed. <br/>
 /// - Alphanumeric: 0–9, A–Z (upper-case only), space, $, %, *, +, -, ., /, : are allowed. <br/>
 /// - Byte: Any Latin 1 block Unicode character is allowed. (For more information see 
 ///       https://en.wikipedia.org/wiki/ISO/IEC_8859-1) <br/>
-/// - Kanji: Japanses Kanji characters as defined by https://en.wikipedia.org/wiki/JIS_X_0208
+/// - Kanji: A character set with latin letters and Japanses Kanji characters as defined by https://en.wikipedia.org/wiki/JIS_X_0208
 /// </summary>
 internal interface IQREncoder{
     /// <summary>
@@ -238,5 +238,35 @@ internal class ByteQREncoder : QREncoderBase
         }
 
         return encoded.ToArray();
+    }
+}
+
+internal class KanjiQREncoder : QREncoderBase
+{    
+    private static HashSet<char>? _charSet = null;
+    
+    protected override HashSet<char> ALLOWED_CHARS {
+        get 
+        {
+            _charSet ??= ResourceIO.ReadInCharset("QRGenerator.Resources.Charsets.JIS-X-0208.txt");
+            return _charSet;
+        }
+    }
+
+    public override byte[] Encode(string toEncode)
+    {
+
+        // Check that toEncode is legal for the mode of this encoder
+        if(!ValidateChars(toEncode)){
+            throw new ArgumentException("toEncode contains characters not allowed in kanji encoding. Allowed Chars are all two byte characters in Shift JIS-x0208.");
+        }
+
+        // Encode string
+        
+        // Convert to encode to Shift JIS-X0208 bytes
+        Encoding enc = Encoding.GetEncoding("shift_jis");
+        byte[] shiftJisBytes = e.G
+
+
     }
 }

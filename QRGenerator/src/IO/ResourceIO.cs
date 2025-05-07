@@ -60,7 +60,7 @@ public static class ResourceIO {
         using Stream? stream = assembly.GetManifestResourceStream(resourceName) 
             ?? throw new InvalidOperationException("Could not get resource stream for resource " + resourceName);
         using StreamReader reader = new StreamReader(stream) 
-            ?? throw new InvalidOperationException("Could not create stream reade.");
+            ?? throw new InvalidOperationException("Could not create stream reader.");
         while (reader.Peek() != -1)
         {
             char toAdd = (char) reader.Read();
