@@ -8,6 +8,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Tables\QRAlphanumericEncodingTable.txt"/>
     <EmbeddedResource Include="Resources\Charsets\ISO8859-1.txt"/>
+    <EmbeddedResource Include="Resources\Charsets\JIS-X-0208.txt"/>
   </ItemGroup>
 
 </Project>
