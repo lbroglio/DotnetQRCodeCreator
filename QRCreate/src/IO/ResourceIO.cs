@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace QRGenerator.IO;
+namespace QRCreate.IO;
 
 /// <summary>
 /// Class holding methods to read in files included in the resources folder. Handles parsing the files into 

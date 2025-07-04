@@ -2,7 +2,7 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRGenerator", "src\QRGenerator.csproj", "{FAB271C2-D0D9-46D0-A2FD-3E088F583248}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCreate", "src\QRCreate.csproj", "{FAB271C2-D0D9-46D0-A2FD-3E088F583248}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
