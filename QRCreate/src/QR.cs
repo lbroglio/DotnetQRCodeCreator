@@ -24,7 +24,6 @@ public enum EncodingMode
 
 }
 
-
 /// <summary>
 /// The level of error correction a QR code should have. A higher level will require a 
 /// larger QR code to store the data. <br/>
@@ -43,8 +42,8 @@ public enum ErrorCorrectionLevel
 
 }
 
-
-public class QRCode {
+public class QRCode
+{
 
     /// <summary>
     /// Create a QR code which contains the given data.
@@ -52,9 +51,10 @@ public class QRCode {
     /// The error correction level will be medium.
     /// </summary>
     /// <param name="dataToEncode">The string that will be encoded into the QR code. 
-    /// The characters in this string must be allowed for the given encoding mode.</param>
-    public QRCode(string dataToEncode){
-        
+    /// The characters in this string must be allowed in one of the encoding modes</param>
+    public QRCode(string dataToEncode)
+    {
+
     }
 
 
@@ -65,7 +65,7 @@ public class QRCode {
     /// <param name="dataToEncode">The string that will be encoded into the QR code. 
     /// The characters in this string must be allowed for the given encoding mode.</param>
     /// <param name="encodingMode">The method of encoding to use for this QR code.</param>
-    public QRCode(string dataToEncode, EncodingMode encodingMode) : this(dataToEncode, encodingMode, ErrorCorrectionLevel.MEDIUM){}
+    public QRCode(string dataToEncode, EncodingMode encodingMode) : this(dataToEncode, encodingMode, ErrorCorrectionLevel.MEDIUM) { }
 
     /// <summary>
     /// Create a QR code which contains the given data using a specified encoding method.
@@ -74,7 +74,8 @@ public class QRCode {
     /// The characters in this string must be allowed for the given encoding mode.</param>
     /// <param name="encodingMode">The method of encoding to use for this QR code.</param>
     /// <param name="errorCorrectionLevel">The level of error correction this QR code should have.</param>
-    public QRCode(string dataToEncode, EncodingMode encodingMode, ErrorCorrectionLevel errorCorrectionLevel){
+    public QRCode(string dataToEncode, EncodingMode encodingMode, ErrorCorrectionLevel errorCorrectionLevel)
+    {
         // Encode the data
         QREncoderBase encoder = encodingMode switch
         {
@@ -84,9 +85,9 @@ public class QRCode {
             EncodingMode.KANJI => new KanjiQREncoder(),
             _ => throw new ArgumentException("Unimplemented encoding mode provided"),
         };
-        
+
         byte[] encoded = encoder.Encode(dataToEncode);
-        
-    } 
+
+    }
 
 }

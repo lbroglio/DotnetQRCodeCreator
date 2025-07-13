@@ -16,7 +16,8 @@ namespace QRCreate.QREncoding;
 /// - Kanji: A character set with latin letters and Japanses Kanji characters as defined by JIS_X_0208. (For more information see 
 ///      https://en.wikipedia.org/wiki/JIS_X_0208)
 /// </summary>
-internal interface IQREncoder{
+public interface IQREncoder
+{
     /// <summary>
     /// Encode a string using the encoding mode specific to this encoder.
     /// </summary>
@@ -30,7 +31,7 @@ internal interface IQREncoder{
     byte[] Encode(string toEncode);
 }
 
-internal abstract class QREncoderBase : IQREncoder
+public abstract class QREncoderBase : IQREncoder
 {
     /// <summary>
     /// Set containing the characters allowed to be used for the mode this Encoder encodes strings into.
@@ -73,7 +74,7 @@ internal class NumericQREncoder : QREncoderBase
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
-            throw new ArgumentException("toEncode contains characters not allowed in numeric encoding");
+            throw new ArgumentException("toEncode contains characters not allowed in numeric encoding.");
         }
 
         // Encode string
@@ -130,13 +131,13 @@ internal class NumericQREncoder : QREncoderBase
 /// Encodes characters for a QR code in alphanumeric encoding mode. <br/>
 /// Allowed characters are 0-9, A-Z (uppercase only), ' ' (space), $, %, *, +, -, ., /, :
 /// </summary> 
-internal class AlphanumericQREncoder : QREncoderBase
+public class AlphanumericQREncoder : QREncoderBase
 {
 
     /// <summary>
     /// Location of the embedded resource with the table which maps letters to their encodings for this type of QR code.
     /// </summary> 
-    private static readonly string ENCODING_TABLE_LOCATION = "QRGenerator.Resources.Tables.QRAlphanumericEncodingTable.txt";
+    private static readonly string ENCODING_TABLE_LOCATION = "QRCreate.Resources.Tables.QRAlphanumericEncodingTable.txt";
 
     private static Dictionary<char, int>? _encodingTable = null;
     /// <summary>
@@ -165,7 +166,7 @@ internal class AlphanumericQREncoder : QREncoderBase
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
-            throw new ArgumentException("toEncode contains characters not allowed in alphanumeric encoding");
+            throw new ArgumentException("toEncode contains characters not allowed in alphanumeric encoding.");
         }
 
         List<byte> encoded = new List<byte>();
@@ -214,13 +215,16 @@ internal class AlphanumericQREncoder : QREncoderBase
 /// </summary> 
 internal class ByteQREncoder : QREncoderBase
 {
-
+    /// <summary>
+    /// Location of the embedded resource with a list of characters allowed in this encoding mode.
+    /// </summary> 
+    private const string CHARSET_FILE_LOCATION = "QRCreate.Resources.Charsets.ISO8859-1.txt";
     private static HashSet<char>? _charSet = null;
     protected override HashSet<char> ALLOWED_CHARS
     {
         get
         {
-            _charSet ??= ResourceIO.ReadInCharset("QRGenerator.Resources.Charsets.ISO8859-1.txt");
+            _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
             return _charSet;
         }
     }
@@ -230,11 +234,11 @@ internal class ByteQREncoder : QREncoderBase
         // Check that toEncode is legal for the mode of this encoder
         if (!ValidateChars(toEncode))
         {
-            throw new ArgumentException("toEncode contains characters not allowed in byte encoding. Allowed Chars are specified in ISO8859-1");
+            throw new ArgumentException("toEncode contains characters not allowed in byte encoding. Allowed Chars are specified in ISO8859-1.");
         }
 
         //Encode String
-        List<byte> encoded = new List<byte>();
+        List<byte> encoded = [];
         byte[] stringLatin1 = Encoding.Latin1.GetBytes(toEncode);
         // Load every bit into the array
         foreach (byte b in stringLatin1)
@@ -257,13 +261,14 @@ internal class ByteQREncoder : QREncoderBase
 /// </summary> 
 internal class KanjiQREncoder : QREncoderBase
 {
+    private const string CHARSET_FILE_LOCATION = "QRCreate.Resources.Charsets.JIS-X-0208.txt";
     private static HashSet<char>? _charSet = null;
 
     protected override HashSet<char> ALLOWED_CHARS
     {
         get
         {
-            _charSet ??= ResourceIO.ReadInCharset("QRGenerator.Resources.Charsets.JIS-X-0208.txt");
+            _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
             return _charSet;
         }
     }
@@ -280,7 +285,7 @@ internal class KanjiQREncoder : QREncoderBase
         }
 
         // Encode string
-        List<byte> encoded = new List<byte>();
+        List<byte> encoded = [];
 
         // Convert to encode to Shift JIS-X0208 bytes
         Encoding enc = Encoding.GetEncoding("shift_jis");

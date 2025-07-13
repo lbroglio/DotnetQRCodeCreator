@@ -22,11 +22,19 @@ public static class ResourceIO {
 
         //TODO: Verify the file format is correct
         var assembly = Assembly.GetExecutingAssembly();
-        using (Stream? stream = assembly.GetManifestResourceStream(resourceName)){
-            if (stream == null){
+        string[] resNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+        foreach (string name in resNames)
+        {
+            Console.WriteLine(name);
+        }
+
+        using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+        {
+            if (stream == null)
+            {
                 throw new InvalidOperationException("Could not get resource stream for resource " + resourceName);
             }
-            using StreamReader reader = new StreamReader(stream) 
+            using StreamReader reader = new StreamReader(stream)
                 ?? throw new InvalidOperationException("Could not create stream reade.");
             while (reader.Peek() != -1)
             {
