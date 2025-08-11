@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using QRCreate.IO;
 
@@ -6,7 +5,7 @@ namespace QRCreate.QREncoding;
 
 
 /// <summary>
-///  Interface of an object which encodes a character string into an array of bits depending on the 
+///  Object which encodes a character string into an array of bits depending on the 
 /// encoding mode used for the QR code <br/>
 /// The possible encoding modes are <br/>
 /// - Numeric: Only 0-9 are allowed. <br/>
@@ -16,29 +15,14 @@ namespace QRCreate.QREncoding;
 /// - Kanji: A character set with latin letters and Japanses Kanji characters as defined by JIS_X_0208. (For more information see 
 ///      https://en.wikipedia.org/wiki/JIS_X_0208)
 /// </summary>
-public interface IQREncoder
-{
-    /// <summary>
-    /// Encode a string using the encoding mode specific to this encoder.
-    /// </summary>
-    /// <param name="toEncode">The string of characters to encode. Should be limited to the 
-    /// allowed characters for the mode of this encoder. </param>
-    /// <returns>The encoded string as an array of one byte unsigned ints. The value of each byte in the array is the value of that bit 
-    /// in the sequence. <br/>
-    ///Ex. if the first bit in the encoded string is a 1 the first byte in the array will equal 1.
-    /// If the second equals zero the second byte in the array will = 0 (and so on).
-    /// </returns> 
-    byte[] Encode(string toEncode);
-}
-
-public abstract class QREncoderBase : IQREncoder
+internal abstract class QREncoderBase
 {
     /// <summary>
     /// Set containing the characters allowed to be used for the mode this Encoder encodes strings into.
     /// </summary> 
-    protected abstract HashSet<char> ALLOWED_CHARS{ get; }
+    protected abstract HashSet<char> ALLOWED_CHARS { get; }
 
-    public abstract byte[] Encode(string toEncode);
+    internal abstract byte[] Encode(string toEncode);
 
     /// <summary>
     /// Validate that the given string only contains characters in the set ALLOWED_CHARS.
@@ -48,16 +32,19 @@ public abstract class QREncoderBase : IQREncoder
     /// - True: If all characters in toValidate are in ALLOWED_CHARS <br/>
     /// - False: If any characters in toValidate are not in  ALLOWED_CHARS
     ///  </returns>
-    protected bool ValidateChars(string toValidate){
-        foreach(char c in toValidate){
-            if(!ALLOWED_CHARS.Contains(c)){
+    protected bool ValidateChars(string toValidate)
+    {
+        foreach (char c in toValidate)
+        {
+            if (!ALLOWED_CHARS.Contains(c))
+            {
                 return false;
             }
         }
 
         return true;
     }
-   
+
 }
 
 /// <summary>
@@ -70,7 +57,7 @@ internal class NumericQREncoder : QREncoderBase
         get { return ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];}
     }
 
-    public override byte[] Encode(string toEncode)
+    internal override byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
@@ -131,7 +118,7 @@ internal class NumericQREncoder : QREncoderBase
 /// Encodes characters for a QR code in alphanumeric encoding mode. <br/>
 /// Allowed characters are 0-9, A-Z (uppercase only), ' ' (space), $, %, *, +, -, ., /, :
 /// </summary> 
-public class AlphanumericQREncoder : QREncoderBase
+internal class AlphanumericQREncoder : QREncoderBase
 {
 
     /// <summary>
@@ -162,7 +149,7 @@ public class AlphanumericQREncoder : QREncoderBase
         }
     }
 
-    public override byte[] Encode(string toEncode)
+    internal override byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
@@ -229,7 +216,7 @@ internal class ByteQREncoder : QREncoderBase
         }
     }
 
-    public override byte[] Encode(string toEncode)
+    internal override byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if (!ValidateChars(toEncode))
@@ -273,7 +260,7 @@ internal class KanjiQREncoder : QREncoderBase
         }
     }
 
-    public override byte[] Encode(string toEncode)
+    internal override byte[] Encode(string toEncode)
     {
         // Register a provider so we can access the legacy shift_jis encoding method 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

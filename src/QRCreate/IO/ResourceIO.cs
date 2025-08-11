@@ -6,7 +6,7 @@ namespace QRCreate.IO;
 /// Class holding methods to read in files included in the resources folder. Handles parsing the files into 
 /// specific formats.
 /// </summary>
-public static class ResourceIO {
+internal static class ResourceIO {
     /// <summary>
     /// Reads in a text file containing a collection of chars and the integer values they encode into <br/>
     /// The format of these files should be <br/>
@@ -60,7 +60,7 @@ public static class ResourceIO {
     /// </summary>
     /// <param name="resourceName">The name of the file contaning the encoding tabled</param>
     /// <returns>A HashSet containing the chars read in</returns>
-    public static HashSet<char> ReadInCharset(string resourceName){
+    internal static HashSet<char> ReadInCharset(string resourceName){
         HashSet<char> readSet = new HashSet<char>();
 
         //TODO: Verify the file format is correct
