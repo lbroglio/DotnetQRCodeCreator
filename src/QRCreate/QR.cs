@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using QRCreate.QREncoding;
 
 namespace QRCreate;
@@ -42,8 +43,39 @@ public enum ErrorCorrectionLevel
 
 }
 
-public class QRCode
+public partial class QRCode
 {
+    /// <summary>
+    ///  The data this QR Code contains encoded with the <see cref="EncodingMode"/> of
+    /// this QR Code.
+    /// </summary>
+    public byte[] EncodedBytes
+    {
+        get { return _encodedBytes; }
+    }
+
+    /// <summary>
+    /// The data this QR Code contains encoded with the <see cref="EncodingMode"/> of
+    /// this QR Code.
+    /// </summary>
+    private readonly byte[] _encodedBytes;
+
+    private readonly byte[] _errorCorrectionBytes;
+
+    /// <summary>
+    /// The type of QRCode encoding this QR code uses. 
+    /// The possible encodings are defined by <see cref="EncodingMode"/>.
+    /// </summary> 
+    public EncodingMode EncodingMode
+    {
+        get { return _encodingMode; }
+    }
+
+    /// <summary>
+    /// The type of QRCode encoding this QR code uses. 
+    /// The possible encodings are defined by <see cref="EncodingMode"/>.
+    /// </summary> 
+    private readonly EncodingMode _encodingMode;
 
     /// <summary>
     /// Create a QR code which contains the given data.
@@ -54,7 +86,12 @@ public class QRCode
     /// The characters in this string must be allowed in one of the encoding modes</param>
     public QRCode(string dataToEncode)
     {
+        // TODO: Implement this constructor
 
+        IQREncoder encoder;
+
+        // Select the smallest EncodingMode possible for dataToEncode
+       
     }
 
 
@@ -76,8 +113,22 @@ public class QRCode
     /// <param name="errorCorrectionLevel">The level of error correction this QR code should have.</param>
     public QRCode(string dataToEncode, EncodingMode encodingMode, ErrorCorrectionLevel errorCorrectionLevel)
     {
+        _encodingMode = encodingMode;
+
         // Encode the data
-        QREncoderBase encoder = encodingMode switch
+        IQREncoder encoder = GetEncoder(_encodingMode);
+        _encodedBytes = encoder.Encode(dataToEncode);
+
+    }
+
+    /// <summary>
+    /// Returns a <see cref="QREncoderBase"/> which encodes a string using the given EncodingMode
+    /// </summary>
+    /// <param name="encodingMode"></param>
+    /// <returns></returns>
+    private static IQREncoder GetEncoder(EncodingMode encodingMode)
+    {
+        return encodingMode switch
         {
             EncodingMode.NUMERIC => new NumericQREncoder(),
             EncodingMode.ALPHA_NUMERIC => new AlphanumericQREncoder(),
@@ -85,9 +136,7 @@ public class QRCode
             EncodingMode.KANJI => new KanjiQREncoder(),
             _ => throw new ArgumentException("Unimplemented encoding mode provided"),
         };
-
-        byte[] encoded = encoder.Encode(dataToEncode);
-
     }
+
 
 }

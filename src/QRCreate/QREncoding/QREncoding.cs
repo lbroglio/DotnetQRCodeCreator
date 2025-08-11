@@ -1,11 +1,12 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using QRCreate.IO;
 
 namespace QRCreate.QREncoding;
 
 
 /// <summary>
-///  Object which encodes a character string into an array of bits depending on the 
+///  Interface for an object which encodes a character string into an array of bits depending on the 
 /// encoding mode used for the QR code <br/>
 /// The possible encoding modes are <br/>
 /// - Numeric: Only 0-9 are allowed. <br/>
@@ -15,49 +16,40 @@ namespace QRCreate.QREncoding;
 /// - Kanji: A character set with latin letters and Japanses Kanji characters as defined by JIS_X_0208. (For more information see 
 ///      https://en.wikipedia.org/wiki/JIS_X_0208)
 /// </summary>
-internal abstract class QREncoderBase
+internal interface IQREncoder
 {
     /// <summary>
-    /// Set containing the characters allowed to be used for the mode this Encoder encodes strings into.
-    /// </summary> 
-    protected abstract HashSet<char> ALLOWED_CHARS { get; }
-
-    internal abstract byte[] Encode(string toEncode);
-
-    /// <summary>
-    /// Validate that the given string only contains characters in the set ALLOWED_CHARS.
+    /// Encode a string into a an array of bytes where each entry is one bit in the encoded string
+    /// according to the QREncoding mode this encoder corresponds to.
     /// </summary>
-    /// <param name="toValidate">A string containing characters</param>
-    /// <returns>
-    /// - True: If all characters in toValidate are in ALLOWED_CHARS <br/>
-    /// - False: If any characters in toValidate are not in  ALLOWED_CHARS
-    ///  </returns>
-    protected bool ValidateChars(string toValidate)
-    {
-        foreach (char c in toValidate)
-        {
-            if (!ALLOWED_CHARS.Contains(c))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+    /// <param name="toEncode"></param>
+    /// <returns></returns>
+    public abstract byte[] Encode(string toEncode);
 }
 
 /// <summary>
 /// Encodes characters for a QR code in numeric encoding mode. <br/>
 /// Allowed characters are 0-9.
 /// </summary> 
-internal class NumericQREncoder : QREncoderBase
+internal partial class NumericQREncoder : IQREncoder
 {
-    protected override HashSet<char> ALLOWED_CHARS  {
-        get { return ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];}
+    [GeneratedRegex(@"^\d+$")]
+    private static partial Regex NumericOnlyRegex();
+
+    /// <summary>
+    /// Validate that the given string only contains characters which can be encoded by this QREncoder.
+    /// </summary>
+    /// <param name="toValidate">A string containing characters</param>
+    /// <returns>
+    /// - True: If all characters in toValidate are allowed by this encoder. <br/>
+    /// - False: If any characters in toValidate are not allowed by this encoder.
+    ///  </returns>
+    internal static bool ValidateChars(string toValidate)
+    {
+        return NumericOnlyRegex().IsMatch(toValidate);
     }
 
-    internal override byte[] Encode(string toEncode)
+    public byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
@@ -118,7 +110,7 @@ internal class NumericQREncoder : QREncoderBase
 /// Encodes characters for a QR code in alphanumeric encoding mode. <br/>
 /// Allowed characters are 0-9, A-Z (uppercase only), ' ' (space), $, %, *, +, -, ., /, :
 /// </summary> 
-internal class AlphanumericQREncoder : QREncoderBase
+internal class AlphanumericQREncoder : IQREncoder
 {
 
     /// <summary>
@@ -138,32 +130,47 @@ internal class AlphanumericQREncoder : QREncoderBase
         }
     }
 
-    protected override HashSet<char> ALLOWED_CHARS {
-        get  { 
-            return [
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-                ' ', '$', '%', '*', '+', '-', '.', '/', ':'
-            ];
-            
+    /// <summary>
+    /// Validate that the given string only contains characters which can be encoded by this QREncoder.
+    /// </summary>
+    /// <param name="toValidate">A string containing characters</param>
+    /// <returns>
+    /// - True: If all characters in toValidate are allowed by this encoder. <br/>
+    /// - False: If any characters in toValidate are not allowed by this encoder.
+    ///  </returns>
+    internal static bool ValidateChars(string toValidate)
+    {
+        // Check that every char in toValidate has an encoding
+        foreach (char c in toValidate)
+        {
+            if (!EncodingTable.ContainsKey(c))
+            {
+                return false;
+            }
         }
+
+        return true;
     }
 
-    internal override byte[] Encode(string toEncode)
+    public byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
-        if(!ValidateChars(toEncode)){
+        if (!ValidateChars(toEncode))
+        {
             throw new ArgumentException("toEncode contains characters not allowed in alphanumeric encoding.");
         }
 
         List<byte> encoded = new List<byte>();
-        for(int i = 0; i < toEncode.Length; i+=2){
+        for (int i = 0; i < toEncode.Length; i += 2)
+        {
             // If there is only one character left
-            if(i + 1 >= toEncode.Length){
-                short encodedNum = (short) EncodingTable[toEncode[i]];
+            if (i + 1 >= toEncode.Length)
+            {
+                short encodedNum = (short)EncodingTable[toEncode[i]];
 
                 // Add each bit in the first eleven bits (starting at the MSB) to the array as its own byte type
-                for(int j = 5; j >= 0; j-=1){
+                for (int j = 5; j >= 0; j -= 1)
+                {
                     short shiftedNum = (short)(encodedNum >> j);
                     byte MSB = (byte)(shiftedNum & 1);
                     encoded.Add(MSB);
@@ -171,17 +178,19 @@ internal class AlphanumericQREncoder : QREncoderBase
 
             }
             // If there are two+ characters left
-            else{
+            else
+            {
 
                 // Encode each character 
                 int encode1 = EncodingTable[toEncode[i]];
                 int encode2 = EncodingTable[toEncode[i + 1]];
 
                 // Combine the two and add to byte array
-                short encodedNum = (short) ((encode1 * 45) + encode2);
+                short encodedNum = (short)((encode1 * 45) + encode2);
 
                 // Add each bit in the first eleven bits (starting at the MSB) to the array as its own byte type
-                for(int j = 10; j >= 0; j-=1){
+                for (int j = 10; j >= 0; j -= 1)
+                {
                     short shiftedNum = (short)(encodedNum >> j);
                     byte MSB = (byte)(shiftedNum & 1);
                     encoded.Add(MSB);
@@ -193,30 +202,45 @@ internal class AlphanumericQREncoder : QREncoderBase
 
 
     }
-    
 }
 
 /// <summary>
 /// Encodes characters for a QR code in byte encoding mode. <br/>
 /// Allowed characters are any characters in the ISO8859 character set.
 /// </summary> 
-internal class ByteQREncoder : QREncoderBase
+internal class ByteQREncoder : IQREncoder
 {
     /// <summary>
     /// Location of the embedded resource with a list of characters allowed in this encoding mode.
     /// </summary> 
     private const string CHARSET_FILE_LOCATION = "QRCreate.Resources.Charsets.ISO8859-1.txt";
     private static HashSet<char>? _charSet = null;
-    protected override HashSet<char> ALLOWED_CHARS
-    {
-        get
-        {
-            _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
-            return _charSet;
-        }
-    }
 
-    internal override byte[] Encode(string toEncode)
+    /// <summary>
+    /// Validate that the given string only contains characters which can be encoded by this QREncoder.
+    /// </summary>
+    /// <param name="toValidate">A string containing characters</param>
+    /// <returns>
+    /// - True: If all characters in toValidate are allowed by this encoder. <br/>
+    /// - False: If any characters in toValidate are not allowed by this encoder.
+    ///  </returns>
+    internal static bool ValidateChars(string toValidate)
+    {
+        _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
+
+        foreach (char c in toValidate)
+        {
+            if (!_charSet.Contains(c))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+
+    public byte[] Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if (!ValidateChars(toEncode))
@@ -240,27 +264,43 @@ internal class ByteQREncoder : QREncoderBase
 
         return encoded.ToArray();
     }
+
 }
 
 /// <summary>
 /// Encodes characters for a QR code in kanji encoding mode. <br/>
 /// Allowed characters are any characters in the JIS-X-0208 character set.
 /// </summary> 
-internal class KanjiQREncoder : QREncoderBase
+internal class KanjiQREncoder : IQREncoder
 {
     private const string CHARSET_FILE_LOCATION = "QRCreate.Resources.Charsets.JIS-X-0208.txt";
     private static HashSet<char>? _charSet = null;
 
-    protected override HashSet<char> ALLOWED_CHARS
+    
+    /// <summary>
+    /// Validate that the given string only contains characters which can be encoded by this QREncoder.
+    /// </summary>
+    /// <param name="toValidate">A string containing characters</param>
+    /// <returns>
+    /// - True: If all characters in toValidate are allowed by this encoder. <br/>
+    /// - False: If any characters in toValidate are not allowed by this encoder.
+    ///  </returns>
+    internal static bool ValidateChars(string toValidate)
     {
-        get
+        _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
+
+        foreach (char c in toValidate)
         {
-            _charSet ??= ResourceIO.ReadInCharset(CHARSET_FILE_LOCATION);
-            return _charSet;
+            if (!_charSet.Contains(c))
+            {
+                return false;
+            }
         }
+
+        return true;
     }
 
-    internal override byte[] Encode(string toEncode)
+    public byte[] Encode(string toEncode)
     {
         // Register a provider so we can access the legacy shift_jis encoding method 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
