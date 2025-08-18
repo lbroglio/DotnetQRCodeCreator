@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using QRCreate.IO;
+using QRCreate.Utils;
 
 namespace QRCreate.QREncoding;
 
@@ -19,12 +20,11 @@ namespace QRCreate.QREncoding;
 internal interface IQREncoder
 {
     /// <summary>
-    /// Encode a string into a an array of bytes where each entry is one bit in the encoded string
-    /// according to the QREncoding mode this encoder corresponds to.
+    /// Encode a string into a an array of bytes using the QRCode encoding this encoder corresponds to.
     /// </summary>
     /// <param name="toEncode"></param>
     /// <returns></returns>
-    public abstract byte[] Encode(string toEncode);
+    public abstract PackedBitList Encode(string toEncode);
 }
 
 /// <summary>
@@ -49,7 +49,7 @@ internal partial class NumericQREncoder : IQREncoder
         return NumericOnlyRegex().IsMatch(toValidate);
     }
 
-    public byte[] Encode(string toEncode)
+    public PackedBitList Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if(!ValidateChars(toEncode)){
@@ -57,7 +57,7 @@ internal partial class NumericQREncoder : IQREncoder
         }
 
         // Encode string
-        List<byte> encoded = new List<byte>();
+        PackedBitList encoded = [];
         for(int i = 0; i < toEncode.Length; i+=3){
             // If only one number is left
             if(toEncode.Length <= i+1){
@@ -67,9 +67,9 @@ internal partial class NumericQREncoder : IQREncoder
 
                 // Add each bit in the first four bits (starting at the MSB) to the array as its own byte type
                 for(int j = 3; j >= 0; j-=1){
-                    short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte MSB = (byte)(shiftedNum & 1);
-                    encoded.Add(MSB);
+                    Bit msb = new();
+                    msb.SetTo(UtilFunctions.IsolateBit(threeDigitNumInt, j));
+                    encoded.Add(msb);
                 }
 
                 
@@ -82,9 +82,9 @@ internal partial class NumericQREncoder : IQREncoder
 
                 // Add each bit in the first eight bits (starting at the MSB) to the array as its own byte type
                 for(int j = 7; j >= 0; j-=1){
-                    short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte MSB = (byte)(shiftedNum & 1);
-                    encoded.Add(MSB);
+                    Bit msb = new();
+                    msb.SetTo(UtilFunctions.IsolateBit(threeDigitNumInt, j));
+                    encoded.Add(msb);
                 }
             }
             // If three+ numbers are left
@@ -94,15 +94,15 @@ internal partial class NumericQREncoder : IQREncoder
 
                 // Add each bit in the first ten bits (starting at the MSB) to the array as its own byte type
                 for(int j = 9; j >= 0; j-=1){
-                    short shiftedNum = (short)(threeDigitNumInt >> j);
-                    byte MSB = (byte)(shiftedNum & 1);
-                    encoded.Add(MSB);
+                    Bit msb = new();
+                    msb.SetTo(UtilFunctions.IsolateBit(threeDigitNumInt, j));
+                    encoded.Add(msb);
                 }
             }
 
-        } 
+        }
 
-       return encoded.ToArray();
+        return encoded;
     }
 }
 
@@ -152,7 +152,7 @@ internal class AlphanumericQREncoder : IQREncoder
         return true;
     }
 
-    public byte[] Encode(string toEncode)
+    public PackedBitList Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if (!ValidateChars(toEncode))
@@ -160,7 +160,7 @@ internal class AlphanumericQREncoder : IQREncoder
             throw new ArgumentException("toEncode contains characters not allowed in alphanumeric encoding.");
         }
 
-        List<byte> encoded = new List<byte>();
+        PackedBitList encoded = [];
         for (int i = 0; i < toEncode.Length; i += 2)
         {
             // If there is only one character left
@@ -171,9 +171,9 @@ internal class AlphanumericQREncoder : IQREncoder
                 // Add each bit in the first eleven bits (starting at the MSB) to the array as its own byte type
                 for (int j = 5; j >= 0; j -= 1)
                 {
-                    short shiftedNum = (short)(encodedNum >> j);
-                    byte MSB = (byte)(shiftedNum & 1);
-                    encoded.Add(MSB);
+                    Bit msb = new();
+                    msb.SetTo(UtilFunctions.IsolateBit(encodedNum, j));
+                    encoded.Add(msb);
                 }
 
             }
@@ -191,14 +191,14 @@ internal class AlphanumericQREncoder : IQREncoder
                 // Add each bit in the first eleven bits (starting at the MSB) to the array as its own byte type
                 for (int j = 10; j >= 0; j -= 1)
                 {
-                    short shiftedNum = (short)(encodedNum >> j);
-                    byte MSB = (byte)(shiftedNum & 1);
-                    encoded.Add(MSB);
+                    Bit msb = new();
+                    msb.SetTo(UtilFunctions.IsolateBit(encodedNum, j));
+                    encoded.Add(msb);
                 }
             }
         }
 
-        return encoded.ToArray();
+        return encoded;
 
 
     }
@@ -240,7 +240,7 @@ internal class ByteQREncoder : IQREncoder
     }
     
 
-    public byte[] Encode(string toEncode)
+    public PackedBitList Encode(string toEncode)
     {
         // Check that toEncode is legal for the mode of this encoder
         if (!ValidateChars(toEncode))
@@ -249,20 +249,20 @@ internal class ByteQREncoder : IQREncoder
         }
 
         //Encode String
-        List<byte> encoded = [];
+        PackedBitList encoded = [];
         byte[] stringLatin1 = Encoding.Latin1.GetBytes(toEncode);
         // Load every bit into the array
         foreach (byte b in stringLatin1)
         {
             for (int i = 7; i >= 0; i -= 1)
             {
-                byte shifted = (byte)(b >> i);
-                byte MSB = (byte)(shifted & 1);
-                encoded.Add(MSB);
+                Bit msb = new();
+                msb.SetTo(UtilFunctions.IsolateBit(b, i));
+                encoded.Add(msb);
             }
         }
 
-        return encoded.ToArray();
+        return encoded;
     }
 
 }
@@ -300,7 +300,7 @@ internal class KanjiQREncoder : IQREncoder
         return true;
     }
 
-    public byte[] Encode(string toEncode)
+    public PackedBitList Encode(string toEncode)
     {
         // Register a provider so we can access the legacy shift_jis encoding method 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -312,7 +312,7 @@ internal class KanjiQREncoder : IQREncoder
         }
 
         // Encode string
-        List<byte> encoded = [];
+        PackedBitList encoded = [];
 
         // Convert to encode to Shift JIS-X0208 bytes
         Encoding enc = Encoding.GetEncoding("shift_jis");
@@ -355,13 +355,13 @@ internal class KanjiQREncoder : IQREncoder
             // Write first 13 bits into string starting at the HSB
             for (int j = 12; j >= 0; j -= 1)
             {
-                short shiftedNum = (short)(qrEncodedVal >> j);
-                byte MSB = (byte)(shiftedNum & 1);
-                encoded.Add(MSB);
+                Bit msb = new();
+                msb.SetTo(UtilFunctions.IsolateBit(qrEncodedVal, j));
+                encoded.Add(msb);
             }
         }
 
-        return encoded.ToArray();
+        return encoded;
 
     }
 }
