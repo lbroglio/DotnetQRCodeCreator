@@ -4,7 +4,9 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCreate", "src\QRCreate\QRCreate.csproj", "{FAB271C2-D0D9-46D0-A2FD-3E088F583248}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCreateUnitTest", "test\QRCreateUnitTest\QRCreateUnitTest.csproj", "{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E180EA61-0CA8-4164-BE56-0745429A86C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCreateUnitTest", "test\QRCreateUnitTest\QRCreateUnitTest.csproj", "{9E52F45B-8FEA-4B00-95BE-66068DEF568A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,10 +26,10 @@ Global
 		{C7D849B1-8AAE-406E-8C28-6C2906123625}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7D849B1-8AAE-406E-8C28-6C2906123625}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7D849B1-8AAE-406E-8C28-6C2906123625}.Release|Any CPU.Build.0 = Release|Any CPU
-		{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E52F45B-8FEA-4B00-95BE-66068DEF568A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E52F45B-8FEA-4B00-95BE-66068DEF568A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E52F45B-8FEA-4B00-95BE-66068DEF568A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E52F45B-8FEA-4B00-95BE-66068DEF568A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +38,6 @@ Global
 		SolutionGuid = {4D6A798F-FDF9-4E3C-8364-F392CBDA0316}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{28B30922-4A14-4C9B-87D1-7BD30D3EE1E6} = {56DFCA4B-AFBB-4948-862A-881A7C4DA792}
+		{9E52F45B-8FEA-4B00-95BE-66068DEF568A} = {E180EA61-0CA8-4164-BE56-0745429A86C0}
 	EndGlobalSection
 EndGlobal

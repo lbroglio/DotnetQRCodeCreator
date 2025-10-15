@@ -178,6 +178,21 @@ public class PackedBitListTests
 
         Assert.That(b.Value, Is.EqualTo(0));
     }
+
+    [Test]
+    public void TestBitlistGetOperator()
+    {
+        PackedBitList bl = new PackedBitList();
+
+        bl.Add(Bit.ONE);
+        bl.Add(Bit.ZERO);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(bl[0].Value, Is.EqualTo(1));
+            Assert.That(bl[1].Value, Is.EqualTo(0));
+        });
+    }
     
 
 

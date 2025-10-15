@@ -178,7 +178,9 @@ public class PackedBitList : IList<Bit>
     /// </summary> 
     public PackedBitList()
     {
-        _backing = [];
+        _backing = new List<byte>();
+        _backing.Add(0);
+        _count = 0;
     }
 
     /// <summary>
@@ -188,6 +190,8 @@ public class PackedBitList : IList<Bit>
     public PackedBitList(int capacity)
     {
         _backing = new List<byte>(capacity / 8);
+        _backing.Add(0);
+        _count = 0;
     }
 
     /// <summary>
@@ -195,8 +199,9 @@ public class PackedBitList : IList<Bit>
     /// </summary>
     /// <param name="collection"></param>
     public PackedBitList(IEnumerable<Bit> collection)
-    {
-        _backing = [];
+    {   
+        // Initialize backing with one byte as starting storage
+        _backing = [0];
 
         foreach (Bit bit in collection)
         {
@@ -209,8 +214,15 @@ public class PackedBitList : IList<Bit>
     /// </summary>
     /// <param name="byteCollection"></param>
     public PackedBitList(ICollection<byte> byteCollection)
-    {
-        _backing = [.. byteCollection];
+    {   
+        // Initialize backing with one byte as starting storage
+        _backing = [0];
+        // Copy list into backing
+        foreach (byte b in byteCollection)
+        {
+            _backing.Add(b);
+            _count += 8;
+        }
     }
 
     private List<byte> _backing;
