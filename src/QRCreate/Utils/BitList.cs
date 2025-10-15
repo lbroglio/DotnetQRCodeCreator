@@ -284,6 +284,7 @@ public class PackedBitList : IList<Bit>
     public void Clear()
     {
         _backing = [];
+        _count = 0;
     }
 
     public bool Contains(Bit item)
