@@ -24,4 +24,8 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QRCreate\QRCreate.csproj" />
+  </ItemGroup>
+
 </Project>

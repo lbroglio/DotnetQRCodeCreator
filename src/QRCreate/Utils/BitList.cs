@@ -7,6 +7,14 @@ namespace QRCreate.Utils;
 /// </summary>
 public struct Bit
 {
+    /// <summary>
+    /// Create a new Bit with the value of zero.
+    /// </summary>
+    public Bit()
+    {
+        _backing = 0;
+    }
+
     private byte _backing;
 
     /// <summary>
@@ -22,7 +30,7 @@ public struct Bit
     /// </summary>
     public void SetToZero()
     {
-        _backing = 1;
+        _backing = 0;
     }
 
     /// <summary>
