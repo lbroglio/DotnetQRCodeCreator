@@ -3,3 +3,7 @@
 
 # Build
 artifacts
+
+# Rider
+*.sln.DotSettings.user
+.idea
