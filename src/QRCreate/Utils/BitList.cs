@@ -175,7 +175,7 @@ public class PackedBitList : IList<Bit>
     public PackedBitList()
     {
         _backing = [0];
-        _count = 0;
+        Count = 0;
     }
 
     /// <summary>
@@ -185,7 +185,7 @@ public class PackedBitList : IList<Bit>
     public PackedBitList(int capacity)
     {
         _backing = new List<byte>(capacity / 8){0};
-        _count = 0;
+        Count = 0;
     }
 
     /// <summary>
@@ -215,18 +215,17 @@ public class PackedBitList : IList<Bit>
         foreach (byte b in byteCollection)
         {
             _backing.Add(b);
-            _count += 8;
+            Count += 8;
         }
     }
 
     private List<byte> _backing;
-    private int _count;
 
     public Bit this[int index]
     {
         get
         {
-            if (index < 0 || index >= _count)
+            if (index < 0 || index >= Count)
             {
                 throw new IndexOutOfRangeException("Index is out of bounds of the list");
             }
@@ -241,7 +240,7 @@ public class PackedBitList : IList<Bit>
         }
         set
         {
-            if (index < 0 || index >= _count)
+            if (index < 0 || index >= Count)
             {
                 throw new IndexOutOfRangeException("Index is out of bounds of the list");
             }
@@ -254,31 +253,28 @@ public class PackedBitList : IList<Bit>
 
     public int Count
     {
-        get { return _count; }
+        get; private set;
     }
 
-    public bool IsReadOnly
-    {
-        get { return false; }
-    }
+    public bool IsReadOnly => false;
 
     public void Add(Bit item)
     {
         // Increase size of backing if needed
-        if (_count / 8 > _backing.Count)
+        if (Count / 8 > _backing.Count)
         {
             _backing.Add(0);
         }
 
-        SetBitAtIndex(item, _count);
-        _count++;
+        SetBitAtIndex(item, Count);
+        Count++;
 
     }
 
     public void Clear()
     {
         _backing = [];
-        _count = 0;
+        Count = 0;
     }
 
     public bool Contains(Bit item)
@@ -310,7 +306,7 @@ public class PackedBitList : IList<Bit>
 
     public void CopyTo(Bit[] array, int arrayIndex)
     {
-        for (int i = 0; i < _count; i++)
+        for (int i = 0; i < Count; i++)
         {
             array[arrayIndex + i] = this[i];
         }
@@ -323,7 +319,7 @@ public class PackedBitList : IList<Bit>
 
     public int IndexOf(Bit item)
     {
-        for (int i = 0; i < _count; i++)
+        for (int i = 0; i < Count; i++)
         {
             if (this[i] == item)
             {
@@ -336,23 +332,23 @@ public class PackedBitList : IList<Bit>
 
     public void Insert(int index, Bit item)
     {
-        if (index >= _count || index < 0)
+        if (index >= Count || index < 0)
         {
          throw new IndexOutOfRangeException("Index is out of bounds of the list");
         }
 
         // Increase size of backing if needed
-        if (_count / 8 > _backing.Count)
+        if (Count / 8 > _backing.Count)
         {
             _backing.Add(0);
         }
 
-        for (int i = _count; i > index; i--)
+        for (int i = Count; i > index; i--)
         {
             SetBitAtIndex(this[i - 1], i);
         }
 
-        _count++;
+        Count++;
     }
 
     public bool Remove(Bit item)
@@ -364,29 +360,29 @@ public class PackedBitList : IList<Bit>
             return false;
         }
 
-        for (int i = indexToRemove; i < _count - 1; i++)
+        for (int i = indexToRemove; i < Count - 1; i++)
         {
             SetBitAtIndex(this[i + 1], i);
         }
 
-        _count--;
+        Count--;
 
         return true;
     }
 
     public void RemoveAt(int index)
     {
-        if (index >= _count || index < 0)
+        if (index >= Count || index < 0)
         {
          throw new IndexOutOfRangeException("Index is out of bounds of the list");
         }
 
-        for (int i = index; i < _count - 1; i++)
+        for (int i = index; i < Count - 1; i++)
         {
             SetBitAtIndex(this[i + 1], i);
         }
 
-        _count--;
+        Count--;
     }
 
     IEnumerator IEnumerable.GetEnumerator()
