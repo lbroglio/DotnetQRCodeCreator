@@ -5,24 +5,23 @@ namespace QRCreate.Utils;
 /// <summary>
 /// Struct which represents a single Bit which can be one or zero.
 /// </summary>
-public struct Bit
+public struct Bit : IEquatable<Bit>
 {
     /// <summary>
     /// Create a new Bit with the value of zero.
     /// </summary>
     public Bit()
     {
-        _backing = 0;
+        Value = 0;
     }
-
-    private byte _backing;
 
     /// <summary>
     /// The value of this Bit. Will only be 0 or 1.
     /// </summary> 
-    public readonly byte Value
+    public byte Value
     {
-        get { return _backing; }
+        get;
+        private set;
     }
 
     /// <summary>
@@ -30,7 +29,7 @@ public struct Bit
     /// </summary>
     public void SetToZero()
     {
-        _backing = 0;
+        Value = 0;
     }
 
     /// <summary>
@@ -38,54 +37,54 @@ public struct Bit
     /// </summary>
     public void SetToOne()
     {
-        _backing = 1;
+        Value = 1;
     }
 
     /// <summary>
     /// Set this Bit based to a given value of either zero one. Will throw an exception if value is
-    /// >1 or <0
+    /// not 1 or 0
     /// </summary>
     /// <param name="value"> 
     /// The value to set this Bit to. Can only be 0 or 1.
     /// </param>
     public void SetTo(int value)
     {
-        if (value < 0 || value > 1)
+        if (value is not 0 && value is not 1)
         {
             throw new ArgumentException("A Bit can only be set to 0 or 1");
         }
 
-        _backing = (byte)value;
+        Value = (byte)value;
     }
 
     public static bool operator ==(Bit b1, Bit b2)
     {
-        return b1._backing == b2._backing;
+        return b1.Value == b2.Value;
     }
 
     public static bool operator !=(Bit b1, Bit b2)
     {
-        return b1._backing != b2._backing;
+        return b1.Value != b2.Value;
     }
 
     public override bool Equals(object? obj)
     {
-        if (obj == null)
+        if (obj is Bit b2)
         {
-            return false;
+            return Value == b2.Value;
         }
-
-        if (obj is not Bit)
-        {
-            return false;
-        }
-
-        return _backing == ((Bit)obj)._backing;
+        
+        return false;
+    }
+    
+    public bool Equals(Bit b2)
+    {
+        return Value == b2.Value;
     }
 
     public override int GetHashCode()
     {
-        return _backing.GetHashCode();
+        return Value.GetHashCode();
     }
 
 
@@ -93,7 +92,7 @@ public struct Bit
     {
         get
         {
-            Bit b = new Bit();
+            var b = new Bit();
             b.SetToOne();
             return b;
         }
@@ -103,7 +102,7 @@ public struct Bit
     {
         get
         {
-            Bit b = new Bit();
+            var b = new Bit();
             b.SetToZero();
             return b;
         }
@@ -126,10 +125,7 @@ public class PackedBitList : IList<Bit>
 
         private int _index;
 
-        public Bit Current
-        {
-            get { return _items[_index]; }
-        }
+        public Bit Current => _items[_index];
 
         object IEnumerator.Current => Current;
 
@@ -178,8 +174,7 @@ public class PackedBitList : IList<Bit>
     /// </summary> 
     public PackedBitList()
     {
-        _backing = new List<byte>();
-        _backing.Add(0);
+        _backing = [0];
         _count = 0;
     }
 
@@ -189,8 +184,7 @@ public class PackedBitList : IList<Bit>
     /// <param name="capacity"></param>
     public PackedBitList(int capacity)
     {
-        _backing = new List<byte>(capacity / 8);
-        _backing.Add(0);
+        _backing = new List<byte>(capacity / 8){0};
         _count = 0;
     }
 

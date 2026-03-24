@@ -12,9 +12,9 @@ namespace QRCreate;
 /// - Alphanumeric: 0–9, A–Z (upper-case only), space, $, %, *, +, -, ., /, : are allowed. <br/>
 /// - Byte: Any Latin 1 block Unicode character is allowed. (For more information see 
 ///       https://en.wikipedia.org/wiki/ISO/IEC_8859-1) <br/>
-/// - Kanji: A character set with latin letters and Japanses Kanji characters as defined by JIS_X_0208. (For more information see 
+/// - Kanji: A character set with latin letters and Japanese Kanji characters as defined by JIS_X_0208. (For more information see 
 ///      https://en.wikipedia.org/wiki/JIS_X_0208)
-/// - Arbitrary: This is not an official encdoding mode from the QR code specification
+/// - Arbitrary: This is not an official encoding mode from the QR code specification
 ///      and instead represents a QR code storing arbitrary data passed to the constructor 
 ///     already in binary form.
 /// </summary>
@@ -47,22 +47,14 @@ public enum ErrorCorrectionLevel
 
 }
 
-public partial class QRCode
+public class QRCode
 {
     /// <summary>
     /// The data this QR Code contains encoded with the <see cref="EncodingMode"/> of
     /// this QR Code.
     /// </summary>
-    public PackedBitList EncodedData
-    {
-        get { return _encodedData; }
-    }
-
-    /// <summary>
-    /// The data this QR Code contains encoded with the <see cref="EncodingMode"/> of
-    /// this QR Code.
-    /// </summary>
-    private readonly PackedBitList _encodedData;
+    public PackedBitList EncodedData { get; private set; }
+    
 
     private readonly PackedBitList _errorCorrectionBytes;
 
@@ -72,14 +64,9 @@ public partial class QRCode
     /// </summary> 
     public EncodingMode EncodingMode
     {
-        get { return _encodingMode; }
+        get; private set; 
     }
-
-    /// <summary>
-    /// The type of QRCode encoding this QR code uses. 
-    /// The possible encodings are defined by <see cref="EncodingMode"/>.
-    /// </summary> 
-    private readonly EncodingMode _encodingMode;
+    
 
     /// <summary>
     /// Create a QR code which contains the given data.
@@ -96,22 +83,22 @@ public partial class QRCode
         // Select the smallest EncodingMode possible for dataToEncode
         if (NumericQREncoder.ValidateChars(dataToEncode))
         {
-            _encodingMode = EncodingMode.NUMERIC;
+            EncodingMode = EncodingMode.NUMERIC;
             encoder = new NumericQREncoder();
         }
         else if (AlphanumericQREncoder.ValidateChars(dataToEncode))
         {
-            _encodingMode = EncodingMode.ALPHA_NUMERIC;
+            EncodingMode = EncodingMode.ALPHA_NUMERIC;
             encoder = new AlphanumericQREncoder();
         }
         else if (ByteQREncoder.ValidateChars(dataToEncode))
         {
-            _encodingMode = EncodingMode.BYTE;
+            EncodingMode = EncodingMode.BYTE;
             encoder = new ByteQREncoder();
         }
         else if (KanjiQREncoder.ValidateChars(dataToEncode))
         {
-            _encodingMode = EncodingMode.KANJI;
+            EncodingMode = EncodingMode.KANJI;
             encoder = new KanjiQREncoder();
         }
         else
@@ -119,7 +106,7 @@ public partial class QRCode
             throw new ArgumentException("dataToEncode can not be encoded into a QR code using any EncodingMode.");
         }
 
-        _encodedData = encoder.Encode(dataToEncode);
+        EncodedData = encoder.Encode(dataToEncode);
 
         // TODO: Calculate error correction
     }
@@ -152,11 +139,11 @@ public partial class QRCode
             // TODO: Move out if arbitrary encoding is disallowed
 
             // Encode the data
-            IQREncoder encoder = GetEncoder(_encodingMode);
-            _encodedData = encoder.Encode(dataToEncode);
+            IQREncoder encoder = GetEncoder(EncodingMode);
+            EncodedData = encoder.Encode(dataToEncode);
         }
 
-        _encodingMode = encodingMode;
+        EncodingMode = encodingMode;
 
 
 
@@ -164,23 +151,38 @@ public partial class QRCode
 
     }
 
+    /// <summary>
+    /// Create a QRCode which contains arbitrary binary instead of encoded text. <br/>
+    /// <b>QRCodes created using this constructor will likely not work with most readers unless arbitaryQRData is already valid QR encoded data.</b> <br/>
+    /// This constructor should only be used if you have a specific purpose for encoding arbitrary data or 
+    /// the data you are passing is already valid QR encoded.
+    /// </summary>
+    /// <param name="arbitraryQRData">A List of bytes containing the arbitrary data to put in this QR code.
+    /// </param>
+    /// <param name="errorCorrectionLevel"></param>
+    public QRCode(List<byte> arbitraryQRData, ErrorCorrectionLevel errorCorrectionLevel)
+    {
+        EncodedData = new PackedBitList(arbitraryQRData);
+        // TODO: Calculate error correction
+    }
+    
     /// <summary>
     /// Create a QRCode which contains arbritrary binary instead of encoded text. <br/>
     /// <b>QRCodes created using this constructor will likely not work with most readers unless arbitaryQRData is already valid QR encoded data.</b> <br/>
     /// This constructor should only be used if you have a specific purpose for encoding arbitrary data or 
     /// the data you are passing is already valid QR encoded.
     /// </summary>
-    /// <param name="arbitraryQRData">A List of bytes containing the arbitrary data to put in this QR code.
-    /// </b> </param>
+    /// <param name="arbitraryQRData">A <see cref="PackedBitList"/>> containing the arbitrary data to put in this QR code.
+    /// </param>
     /// <param name="errorCorrectionLevel"></param>
-    public QRCode(List<byte> arbitraryQRData, ErrorCorrectionLevel errorCorrectionLevel)
+    public QRCode(PackedBitList arbitraryQRData, ErrorCorrectionLevel errorCorrectionLevel)
     {
-        _encodedData = new PackedBitList(arbitraryQRData);
+        EncodedData = new PackedBitList(arbitraryQRData);
         // TODO: Calculate error correction
     }
 
     /// <summary>
-    /// Returns a <see cref="QREncoderBase"/> which encodes a string using the given EncodingMode
+    /// Returns a <see cref="IQREncoder"/> which encodes a string using the given EncodingMode
     /// </summary>
     /// <param name="encodingMode"></param>
     /// <returns></returns>

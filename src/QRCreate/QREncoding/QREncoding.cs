@@ -20,7 +20,7 @@ namespace QRCreate.QREncoding;
 internal interface IQREncoder
 {
     /// <summary>
-    /// Encode a string into a an array of bytes using the QRCode encoding this encoder corresponds to.
+    /// Encode a string into an array of bytes using the QRCode encoding this encoder corresponds to.
     /// </summary>
     /// <param name="toEncode"></param>
     /// <returns></returns>
@@ -116,7 +116,7 @@ internal class AlphanumericQREncoder : IQREncoder
     /// <summary>
     /// Location of the embedded resource with the table which maps letters to their encodings for this type of QR code.
     /// </summary> 
-    private static readonly string ENCODING_TABLE_LOCATION = "QRCreate.Resources.Tables.QRAlphanumericEncodingTable.txt";
+    private const string ENCODING_TABLE_LOCATION = "QRCreate.Resources.Tables.QRAlphanumericEncodingTable.txt";
 
     private static Dictionary<char, int>? _encodingTable = null;
     /// <summary>
